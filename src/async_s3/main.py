@@ -91,7 +91,7 @@ def validate_delimiter(ctx: click.Context, param: click.Parameter, value: str) -
 
 @list_objects_options
 @as3.command()
-def ls(  # pylint: disable=too-many-arguments
+def ls(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -122,7 +122,7 @@ def ls(  # pylint: disable=too-many-arguments
 
 @list_objects_options
 @as3.command()
-def du(  # pylint: disable=too-many-arguments
+def du(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -159,7 +159,7 @@ def human_readable_size(size: float, decimal_places: int = 2) -> str:
     return f"{size:.{decimal_places}f} {unit}"
 
 
-def list_objects(  # pylint: disable=too-many-arguments
+def list_objects(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     s3_url: str,
     max_level: Optional[int] = None,
     max_folders: Optional[int] = None,
@@ -180,7 +180,7 @@ def list_objects(  # pylint: disable=too-many-arguments
     )
 
 
-async def list_objects_async(  # pylint: disable=too-many-arguments
+async def list_objects_async(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -210,7 +210,7 @@ async def list_objects_async(  # pylint: disable=too-many-arguments
     return result
 
 
-def print_start_info(  # pylint: disable=too-many-arguments
+def print_start_info(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],

@@ -40,7 +40,7 @@ For more information about a script run:
 
 
 ## Coverage report
-* [Codecov](https://app.codecov.io/gh/andgineer/async-s3/tree/main/src%2Faws_s3)
+* [Codecov](https://app.codecov.io/gh/andgineer/async-s3/tree/main/src%2Fasync_s3)
 * [Coveralls](https://coveralls.io/github/andgineer/async-s3)
 
 > Created with cookiecutter using [template](https://github.com/andgineer/cookiecutter-python-package)

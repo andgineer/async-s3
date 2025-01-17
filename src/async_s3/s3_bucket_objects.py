@@ -37,7 +37,7 @@ class S3BucketObjects:
         self._bucket = bucket
         self.semaphore = asyncio.Semaphore(parallelism)
 
-    async def _list_objects(  # pylint: disable=too-many-arguments, too-many-locals
+    async def _list_objects(  # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
         self,
         s3_client: aiobotocore.client.AioBaseClient,
         prefix: str,
