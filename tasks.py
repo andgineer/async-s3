@@ -1,15 +1,13 @@
-import os
 import shutil
 import sys
 
-from invoke import task, Context, Collection
-import subprocess
+from invoke import Collection, Context, task
 
 
 def get_allowed_doc_languages():
     build_docs_file_name = "scripts/build-docs.sh"
     try:
-        with open(build_docs_file_name, "r") as f:
+        with open(build_docs_file_name) as f:
             for line in f:
                 if "for lang in" in line:
                     langs = line.split("in")[1].strip().split(";")[0].split()
@@ -24,9 +22,9 @@ ALLOWED_VERSION_TYPES = ["release", "bug", "feature"]
 
 
 @task
-def version(c: Context):
+def version(_c: Context):
     """Show the current version."""
-    with open("src/async-s3/__about__.py", "r") as f:
+    with open("src/async_s3/__about__.py") as f:
         version_line = f.readline()
         version_num = version_line.split('"')[1]
         print(version_num)
@@ -45,18 +43,26 @@ def ver_task_factory(version_type: str):
 @task
 def compile_requirements(c: Context):
     "Convert requirements.in to requirements.txt and requirements.dev.txt."
-    start_time = subprocess.check_output(["date", "+%s"]).decode().strip()
-    c.run("uv pip compile requirements.in --output-file=requirements.txt --upgrade")  # --refresh-package
-    reqs_time = subprocess.check_output(["date", "+%s"]).decode().strip()
-    c.run("uv pip compile requirements.dev.in --output-file=requirements.dev.txt --upgrade")
-    end_time = subprocess.check_output(["date", "+%s"]).decode().strip()
-    print(f"Req's compilation time: {int(reqs_time) - int(start_time)} seconds")
-    print(f"Req's dev compilation time: {int(end_time) - int(reqs_time)} seconds")
-    print(f"Total execution time: {int(end_time) - int(start_time)} seconds")
+    # Use Python's time module to avoid subprocess security issues
+    import time
 
-    
+    start_time = int(time.time())
+
+    c.run(
+        "uv pip compile requirements.in --output-file=requirements.txt --upgrade",
+    )  # --refresh-package
+
+    reqs_time = int(time.time())
+
+    c.run("uv pip compile requirements.dev.in --output-file=requirements.dev.txt --upgrade")
+
+    end_time = int(time.time())
+
+    print(f"Req's compilation time: {reqs_time - start_time} seconds")
+    print(f"Req's dev compilation time: {end_time - reqs_time} seconds")
+    print(f"Total execution time: {end_time - start_time} seconds")
+
     c.run("scripts/include_pyproject_requirements.py requirements.in")
-    
 
 
 @task(pre=[compile_requirements])
@@ -64,6 +70,7 @@ def reqs(c: Context):
     """Upgrade requirements including pre-commit."""
     c.run("pre-commit autoupdate")
     c.run("uv pip install -r requirements.dev.txt")
+
 
 def docs_task_factory(language: str):
     @task
