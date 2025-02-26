@@ -16,7 +16,7 @@ Read detailed explanation in [the blog post](https://sorokin.engineer/posts/en/a
 ```python
 --8<-- "list.py"
 ```
-You can control the depth of recursion by specifying the `max_level` parameter, 
+You can control the depth of recursion by specifying the `max_level` parameter,
 by default depth is not limited.
 
 `max_folders` parameter allows you to group folders by prefix to reduce the number of API calls.
@@ -32,4 +32,3 @@ async for page in S3BucketObjects(bucket='my-bucket').iter("my-prefix/", max_lev
 
 ## Docstrings
 [S3BucketObjects][async_s3]
-

@@ -13,14 +13,14 @@ def test_version():
 
 def test_as3_version():
     runner = CliRunner()
-    result = runner.invoke(as3, ['--version'])
+    result = runner.invoke(as3, ["--version"])
     assert result.exit_code == 0
     assert __version__ in result.output
 
 
 @pytest.fixture
 def mock_list_objects_async():
-    with patch('async_s3.main.list_objects_async', new_callable=AsyncMock) as mock:
+    with patch("async_s3.main.list_objects_async", new_callable=AsyncMock) as mock:
         yield mock
 
 
@@ -31,7 +31,7 @@ def test_as3_ls_command(mock_list_objects_async):
     ]
 
     runner = CliRunner()
-    result = runner.invoke(as3, ['ls', 's3://bucket/key'])
+    result = runner.invoke(as3, ["ls", "s3://bucket/key"])
 
     assert result.exit_code == 0
     assert "file1.txt" in result.output
@@ -45,7 +45,7 @@ def test_as3_du_command(mock_list_objects_async):
     ]
 
     runner = CliRunner()
-    result = runner.invoke(as3, ['du', 's3://bucket/key'])
+    result = runner.invoke(as3, ["du", "s3://bucket/key"])
 
     assert result.exit_code == 0
     assert "Total objects: 2" in result.output
@@ -54,7 +54,7 @@ def test_as3_du_command(mock_list_objects_async):
 
 def test_as3_invalid_s3_url_ls():
     runner = CliRunner()
-    result = runner.invoke(as3, ['ls', 'invalid_url'])
+    result = runner.invoke(as3, ["ls", "invalid_url"])
 
     assert result.exit_code != 0
     assert "Invalid S3 URL. It should start with s3://" in result.output
@@ -62,7 +62,7 @@ def test_as3_invalid_s3_url_ls():
 
 def test_as3_invalid_s3_url_du():
     runner = CliRunner()
-    result = runner.invoke(as3, ['du', 'invalid_url'])
+    result = runner.invoke(as3, ["du", "invalid_url"])
 
     assert result.exit_code != 0
     assert "Invalid S3 URL. It should start with s3://" in result.output
@@ -80,7 +80,7 @@ async def test_list_objects_async_no_repeat():
         {"Key": "file2.txt", "Size": 5678},
     ]
 
-    with patch('async_s3.main.S3BucketObjects') as MockS3BucketObjects:
+    with patch("async_s3.main.S3BucketObjects") as MockS3BucketObjects:
         instance = MockS3BucketObjects.return_value
         instance.iter = MagicMock(side_effect=lambda *args, **kwargs: mock_iter([mock_result, []]))
 
@@ -89,9 +89,11 @@ async def test_list_objects_async_no_repeat():
         max_folders = 1
         repeat = 1
         parallelism = 100
-        delimiter = '/'
+        delimiter = "/"
 
-        result = await list_objects_async(s3_url, max_level, max_folders, repeat, parallelism, delimiter)
+        result = await list_objects_async(
+            s3_url, max_level, max_folders, repeat, parallelism, delimiter
+        )
 
         assert result == mock_result
         assert instance.iter.call_count == repeat
@@ -104,18 +106,20 @@ async def test_list_objects_async_repeat():
         {"Key": "file2.txt", "Size": 5678},
     ]
 
-    with patch('async_s3.main.S3BucketObjects') as MockS3BucketObjects:
+    with patch("async_s3.main.S3BucketObjects") as MockS3BucketObjects:
         s3_url = "s3://bucket/key"
         max_level = 1
         max_folders = 1
         repeat = 3
         parallelism = 100
-        delimiter = '/'
+        delimiter = "/"
 
         instance = MockS3BucketObjects.return_value
         instance.iter = MagicMock(side_effect=lambda *args, **kwargs: mock_iter([mock_result, []]))
 
-        result = await list_objects_async(s3_url, max_level, max_folders, repeat, parallelism, delimiter)
+        result = await list_objects_async(
+            s3_url, max_level, max_folders, repeat, parallelism, delimiter
+        )
 
         assert result == mock_result
         assert instance.iter.call_count == repeat

@@ -1,7 +1,4 @@
-from typing import List, Dict
-
-
-def group_by_prefix(words: List[str], desired_group_count: int) -> List[str]:
+def group_by_prefix(words: list[str], desired_group_count: int) -> list[str]:  # noqa: C901
     """Groups words by prefixes to create a desired number of word groups.
 
     Try to create the desired number of groups if possible.
@@ -22,7 +19,7 @@ def group_by_prefix(words: List[str], desired_group_count: int) -> List[str]:
         else:
             prefix_groups[prefix][1] += 1
 
-    def split_prefix_groups(groups: Dict[str, List[int]]) -> Dict[str, List[int]]:
+    def split_prefix_groups(groups: dict[str, list[int]]) -> dict[str, list[int]]:
         new_groups = {}
         for prefix, (start_index, count, can_split) in groups.items():
             if not can_split or count < max(2, (len(words) // desired_group_count)):
@@ -58,7 +55,7 @@ def group_by_prefix(words: List[str], desired_group_count: int) -> List[str]:
     return list(prefix_groups.keys())
 
 
-def find_longest_common_prefix(words: List[str]) -> str:
+def find_longest_common_prefix(words: list[str]) -> str:
     """Finds the longest common prefix among a list of words."""
     if not words:
         return ""

@@ -4,7 +4,7 @@ import pathlib
 import socket
 import subprocess
 import time
-from unittest.mock import patch, Mock, call, MagicMock
+from unittest.mock import patch, call, MagicMock
 
 import pytest
 import yaml
@@ -12,15 +12,14 @@ import yaml
 import boto3
 import aiobotocore
 import aiobotocore.session
-from async_s3 import S3BucketObjects
 
 
 @pytest.fixture(scope="session", autouse=True)
 def set_fake_aws_credentials():
     """Set fake AWS credentials for the test session."""
-    os.environ['AWS_ACCESS_KEY_ID'] = 'fake_access_key'
-    os.environ['AWS_SECRET_ACCESS_KEY'] = 'fake_secret_key'
-    os.environ['AWS_SESSION_TOKEN'] = 'fake_session_token'
+    os.environ["AWS_ACCESS_KEY_ID"] = "fake_access_key"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "fake_secret_key"
+    os.environ["AWS_SESSION_TOKEN"] = "fake_session_token"
     yield
 
 
@@ -67,7 +66,7 @@ def wait_for_moto_server(s3_client, moto_server_process, retries=5, delay=1):
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('', 0))
+        s.bind(("", 0))
         return s.getsockname()[1]
 
 
@@ -81,7 +80,9 @@ def fake_s3_server():
     """
     port = get_free_port()
     moto_server_process = subprocess.Popen(
-        ["moto_server", "-H", "0.0.0.0", f"-p{port}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ["moto_server", "-H", "0.0.0.0", f"-p{port}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     endpoint_url = f"http://127.0.0.1:{port}"
     s3_client = boto3.client("s3", region_name="us-east-1", endpoint_url=endpoint_url)
@@ -95,9 +96,7 @@ def fake_s3_server():
     session = aiobotocore.session.get_session()
     yield (
         s3_client,
-        lambda: session.create_client(
-            "s3", region_name="us-east-1", endpoint_url=endpoint_url
-        ),
+        lambda: session.create_client("s3", region_name="us-east-1", endpoint_url=endpoint_url),
     )
 
     # Teardown
@@ -146,8 +145,11 @@ class MockS3Client:
     def _mock_paginate(self):
         async def async_generator(**kwargs):
             self.calls.append(call.get_paginator().paginate(**kwargs))
-            async for result in self.real_client.get_paginator('list_objects_v2').paginate(**kwargs):
+            async for result in self.real_client.get_paginator("list_objects_v2").paginate(
+                **kwargs
+            ):
                 yield result
+
         return async_generator
 
 

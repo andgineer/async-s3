@@ -1,5 +1,6 @@
 import shutil
 import sys
+import time
 
 from invoke import Collection, Context, task
 
@@ -43,8 +44,6 @@ def ver_task_factory(version_type: str):
 @task
 def compile_requirements(c: Context):
     "Convert requirements.in to requirements.txt and requirements.dev.txt."
-    # Use Python's time module to avoid subprocess security issues
-    import time
 
     start_time = int(time.time())
 

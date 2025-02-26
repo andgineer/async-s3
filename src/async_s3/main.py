@@ -2,13 +2,15 @@
 
 import asyncio
 import time
-from typing import Iterable, Dict, Any, Optional, Callable, Tuple
-import rich_click as click
-from rich.progress import Progress, TextColumn, BarColumn, TaskProgressColumn
-import botocore.exceptions
-from async_s3.s3_bucket_objects import S3BucketObjects
-from async_s3 import __version__
+from collections.abc import Iterable
+from typing import Any, Callable, Optional
 
+import botocore.exceptions
+import rich_click as click
+from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
+
+from async_s3 import __version__
+from async_s3.s3_bucket_objects import S3BucketObjects
 
 click.rich_click.USE_MARKDOWN = True
 
@@ -22,7 +24,7 @@ def error(message: str) -> None:
     raise click.Abort()
 
 
-def print_summary(objects: Iterable[Dict[str, Any]]) -> None:
+def print_summary(objects: Iterable[dict[str, Any]]) -> None:
     """Print a summary of the objects."""
     total_size = sum(obj["Size"] for obj in objects)
     message = (
@@ -48,7 +50,10 @@ def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
         "-l",
         type=int,
         default=None,
-        help="The maximum folders level to traverse in separate requests. By default traverse all levels.",
+        help=(
+            "The maximum folders level to traverse in separate requests. "
+            "By default traverse all levels."
+        ),
     )(func)
     func = click.option(
         "--max-folders",
@@ -71,7 +76,7 @@ def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
         default=100,
         help="The maximum number of concurrent requests to AWS S3. By default 100.",
     )(func)
-    func = click.option(
+    return click.option(
         "--delimiter",
         "-d",
         type=str,
@@ -79,10 +84,9 @@ def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
         default="/",
         help="Delimiter for 'folders'. Default is '/'.",
     )(func)
-    return func
 
 
-def validate_delimiter(ctx: click.Context, param: click.Parameter, value: str) -> str:  # pylint: disable=unused-argument
+def validate_delimiter(ctx: click.Context, param: click.Parameter, value: str) -> str:  # noqa: ARG001
     """Validate the `Delimiter` option."""
     if len(value) != 1:
         raise click.BadParameter("Delimiter must be exactly one character.")
@@ -91,7 +95,7 @@ def validate_delimiter(ctx: click.Context, param: click.Parameter, value: str) -
 
 @list_objects_options
 @as3.command()
-def ls(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def ls(  # noqa: PLR0913
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -122,7 +126,7 @@ def ls(  # pylint: disable=too-many-arguments,too-many-positional-arguments
 
 @list_objects_options
 @as3.command()
-def du(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def du(  # noqa: PLR0913
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -152,21 +156,22 @@ def du(  # pylint: disable=too-many-arguments,too-many-positional-arguments
 
 def human_readable_size(size: float, decimal_places: int = 2) -> str:
     """Convert bytes to a human-readable format."""
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size < 1024.0:
+    for _unit in ["B", "KB", "MB", "GB", "TB"]:
+        bytes_in_kilo = 1024.0
+        if size < bytes_in_kilo:
             break
-        size /= 1024.0
-    return f"{size:.{decimal_places}f} {unit}"
+        size /= bytes_in_kilo
+    return f"{size:.{decimal_places}f} {_unit}"
 
 
-def list_objects(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def list_objects(  # noqa: PLR0913
     s3_url: str,
     max_level: Optional[int] = None,
     max_folders: Optional[int] = None,
     repeat: int = 1,
     parallelism: int = 100,
     delimiter: str = "/",
-) -> Iterable[Dict[str, Any]]:
+) -> Iterable[dict[str, Any]]:
     """List objects in an S3 bucket."""
     return asyncio.run(
         list_objects_async(
@@ -176,18 +181,18 @@ def list_objects(  # pylint: disable=too-many-arguments,too-many-positional-argu
             repeat=repeat,
             parallelism=parallelism,
             delimiter=delimiter,
-        )
+        ),
     )
 
 
-async def list_objects_async(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+async def list_objects_async(  # noqa: PLR0913
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
     repeat: int,
     parallelism: int,
     delimiter: str,
-) -> Iterable[Dict[str, Any]]:
+) -> Iterable[dict[str, Any]]:
     """List objects in an S3 bucket."""
     assert repeat > 0
     print_start_info(s3_url, max_level, max_folders, delimiter, parallelism, repeat)
@@ -195,11 +200,15 @@ async def list_objects_async(  # pylint: disable=too-many-arguments,too-many-pos
     bucket, key = split_s3_url(s3_url)
     s3_list = S3BucketObjects(bucket, parallelism=parallelism)
     total_time = 0.0
-    result: Iterable[Dict[str, Any]] = []
+    result: Iterable[dict[str, Any]] = []
 
     for attempt in range(repeat):
         result, duration = await list_objects_with_progress(
-            s3_list, key, max_level, max_folders, delimiter
+            s3_list,
+            key,
+            max_level,
+            max_folders,
+            delimiter,
         )
         total_time += duration
         print_attempt_info(attempt, duration)
@@ -210,7 +219,7 @@ async def list_objects_async(  # pylint: disable=too-many-arguments,too-many-pos
     return result
 
 
-def print_start_info(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def print_start_info(  # noqa: PLR0913
     s3_url: str,
     max_level: Optional[int],
     max_folders: Optional[int],
@@ -221,7 +230,7 @@ def print_start_info(  # pylint: disable=too-many-arguments,too-many-positional-
     """Print the command parameters."""
     click.echo(
         f"{click.style('Listing objects in ', fg='yellow')}"
-        f"{click.style(s3_url, fg='yellow', bold=True)}"
+        f"{click.style(s3_url, fg='yellow', bold=True)}",
     )
     click.echo(
         f"{click.style('max_level: ', fg='yellow')}"
@@ -233,7 +242,7 @@ def print_start_info(  # pylint: disable=too-many-arguments,too-many-positional-
         f"{click.style('parallelism: ', fg='yellow')}"
         f"{click.style(str(parallelism), fg='yellow', bold=True)}, "
         f"{click.style(str(repeat), fg='yellow', bold=True)}"
-        f"{click.style(' times.', fg='yellow')}"
+        f"{click.style(' times.', fg='yellow')}",
     )
 
 
@@ -248,7 +257,7 @@ async def list_objects_with_progress(  # pylint: disable=too-many-locals
     max_level: Optional[int],
     max_folders: Optional[int],
     delimiter: str,
-) -> Tuple[Iterable[Dict[str, Any]], float]:
+) -> tuple[Iterable[dict[str, Any]], float]:
     """List objects in an S3 bucket with a progress bar.
 
     Returns:
@@ -269,7 +278,10 @@ async def list_objects_with_progress(  # pylint: disable=too-many-locals
             objects_bar = progress.add_task("[green]Objects: ", total=None)
             size_bar = progress.add_task("[green]Size:    ", total=None)
             async for objects_page in s3_list.iter(
-                key, max_level=max_level, max_folders=max_folders, delimiter=delimiter
+                key,
+                max_level=max_level,
+                max_folders=max_folders,
+                delimiter=delimiter,
             ):
                 result.extend(objects_page)
                 page_objects_size = sum(obj["Size"] for obj in objects_page)
@@ -294,7 +306,7 @@ def print_attempt_info(attempt: int, duration: float) -> None:
     click.echo(
         f"{click.style(f'({attempt + 1}) Elapsed time: ', fg='green')}"
         f"{click.style(f'{duration:.2f}', fg='green', bold=True)} "
-        f"{click.style('seconds', fg='green')}"
+        f"{click.style('seconds', fg='green')}",
     )
 
 
@@ -303,7 +315,7 @@ def print_average_time(total_time: float, repeat: int) -> None:
     click.echo(
         f"{click.style('Average time: ', fg='yellow')}"
         f"{click.style(f'{total_time / repeat:.2f}', fg='yellow', bold=True)} "
-        f"{click.style('seconds', fg='yellow')}"
+        f"{click.style('seconds', fg='yellow')}",
     )
 
 

@@ -26,9 +26,9 @@ if [[ ! -d ${VENV_FOLDER} ]] ; then
     unset CONDA_PREFIX  # if conda is installed, it will mess with the virtual env
 
     echo -e $CYAN"Creating virtual environment for python in ${VENV_FOLDER}"$NC
-    
+
     if uv venv ${VENV_FOLDER} --python=python${PRIMARY_PYTHON_VERSION}; then
-    
+
       START_TIME=$(date +%s)
 
       . ${VENV_FOLDER}/bin/activate
@@ -38,9 +38,9 @@ if [[ ! -d ${VENV_FOLDER} ]] ; then
       END_TIME=$(date +%s)
       echo "Environment created in $((END_TIME - $START_TIME)) seconds"
     else
-      
+
       echo -e $RED"Error to create virtual env. Do you have Astral's UV installed ( https://github.com/astral-sh/uv )?"$NC
-      
+
       return 1
     fi
 else

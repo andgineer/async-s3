@@ -2,7 +2,7 @@
 [![Coverage](https://raw.githubusercontent.com/andgineer/async-s3/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/andgineer/async-s3/blob/python-coverage-comment-action-data/htmlcov/index.html)
 # async-s3
 
-S3 Bucket helper utils. 
+S3 Bucket helper utils.
 
 Async list objects by folders or by prefix groups with recursion limit.
 

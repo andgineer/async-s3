@@ -1,4 +1,5 @@
 import asyncio
+
 from async_s3 import S3BucketObjects
 
 
@@ -7,6 +8,7 @@ async def main():
 
     for obj in objects:
         print(obj["Key"])
+
 
 if __name__ == "__main__":
     asyncio.run(main())

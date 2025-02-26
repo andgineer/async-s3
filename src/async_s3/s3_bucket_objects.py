@@ -1,18 +1,18 @@
 import asyncio
 import functools
-from typing import Any, Dict, Optional, List, AsyncIterator, Set
+from collections.abc import AsyncIterator
+from typing import Any, Optional
 
-import aiobotocore.session
 import aiobotocore.client
+import aiobotocore.session
 from botocore.config import Config
 
 from async_s3.group_by_prefix import group_by_prefix
 
-
 DEFAULT_PARALLELISM = 100
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def create_session() -> aiobotocore.session.AioSession:
     """Create a session object."""
     return aiobotocore.session.get_session()
@@ -37,7 +37,7 @@ class S3BucketObjects:
         self._bucket = bucket
         self.semaphore = asyncio.Semaphore(parallelism)
 
-    async def _list_objects(  # pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
+    async def _list_objects(  # noqa: PLR0913
         self,
         s3_client: aiobotocore.client.AioBaseClient,
         prefix: str,
@@ -45,9 +45,9 @@ class S3BucketObjects:
         max_level: Optional[int],
         max_folders: Optional[int],
         delimiter: str,
-        objects_keys: Set[str],
-        queue: asyncio.Queue[List[Dict[str, Any]]],
-        active_tasks: Set[asyncio.Task[None]],
+        objects_keys: set[str],
+        queue: asyncio.Queue[list[dict[str, Any]]],
+        active_tasks: set[asyncio.Task[None]],
     ) -> None:
         """Emit object pages to the queue."""
         paginator = s3_client.get_paginator("list_objects_v2")
@@ -90,11 +90,11 @@ class S3BucketObjects:
                         objects_keys,
                         queue,
                         active_tasks,
-                    )
+                    ),
                 )
-            except Exception as e:
+            except Exception:
                 self.semaphore.release()
-                raise e
+                raise
             active_tasks.add(task)
             task.add_done_callback(lambda t: self._task_done(t, active_tasks, queue))
 
@@ -105,26 +105,29 @@ class S3BucketObjects:
         max_level: Optional[int] = None,
         max_folders: Optional[int] = None,
         delimiter: str = "/",
-    ) -> AsyncIterator[List[Dict[str, Any]]]:
+    ) -> AsyncIterator[list[dict[str, Any]]]:
         """Generator that yields objects in the bucket with the given prefix.
 
-        Yield objects by partial chunks (list of AWS S3 object dicts) as they are collected from AWS asynchronously.
+        Yield objects by partial chunks (list of AWS S3 object dicts) as they
+         are collected from AWS asynchronously.
 
-        max_level: The maximum folders depth to traverse in separate requests. If None, traverse all levels.
-        max_folders: The maximum number of folders to load in separate requests. If None, requests all folders.
+        max_level: The maximum folders depth to traverse in separate requests.
+        If None, traverse all levels.
+        max_folders: The maximum number of folders to load in separate requests.
+        If None, requests all folders.
         Otherwise, the folders are grouped by prefixes before loading in separate requests.
         Try to group in the given number of folders if possible.
         delimiter: The delimiter for "folders".
         """
         # if we group by prefixes, some objects may be listed multiple times
         # to avoid this, we store the keys of the objects already listed
-        objects_keys: Set[str] = set()
+        objects_keys: set[str] = set()
 
         # queue to store the objects pages from the tasks
-        queue: asyncio.Queue[List[Dict[str, Any]]] = asyncio.Queue()
+        queue: asyncio.Queue[list[dict[str, Any]]] = asyncio.Queue()
 
         # set to keep track of active tasks
-        active_tasks: Set[asyncio.Task[None]] = set()
+        active_tasks: set[asyncio.Task[None]] = set()
 
         async with get_s3_client() as s3_client:
             await self.semaphore.acquire()
@@ -140,11 +143,11 @@ class S3BucketObjects:
                         objects_keys,
                         queue,
                         active_tasks,
-                    )
+                    ),
                 )
-            except Exception as e:
+            except Exception:
                 self.semaphore.release()
-                raise e
+                raise
             active_tasks.add(root_task)
             root_task.add_done_callback(lambda t: self._task_done(t, active_tasks, queue))
 
@@ -159,8 +162,8 @@ class S3BucketObjects:
     def _task_done(
         self,
         task: asyncio.Task[None],
-        active_tasks: Set[asyncio.Task[None]],
-        queue: asyncio.Queue[List[Dict[str, Any]]],
+        active_tasks: set[asyncio.Task[None]],
+        queue: asyncio.Queue[list[dict[str, Any]]],
     ) -> None:
         """Callback for when a task is done."""
 
@@ -178,18 +181,23 @@ class S3BucketObjects:
         max_level: Optional[int] = None,
         max_folders: Optional[int] = None,
         delimiter: str = "/",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """List all objects in the bucket with the given prefix.
 
-        max_level: The maximum folders depth to traverse in separate requests. If None, traverse all levels.
-        max_folders: The maximum number of folders to load in separate requests. If None, requests all folders.
+        max_level: The maximum folders depth to traverse in separate requests.
+        If None, traverse all levels.
+        max_folders: The maximum number of folders to load in separate requests.
+        If None, requests all folders.
         Otherwise, the folders are grouped by prefixes before loading in separate requests.
         Try to group to the given `max_folders` if possible.
         delimiter: The delimiter for "folders".
         """
         objects = []
         async for objects_page in self.iter(
-            prefix, max_level=max_level, max_folders=max_folders, delimiter=delimiter
+            prefix,
+            max_level=max_level,
+            max_folders=max_folders,
+            delimiter=delimiter,
         ):
             objects.extend(objects_page)
         return objects
