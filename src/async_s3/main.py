@@ -51,8 +51,8 @@ def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
         type=int,
         default=None,
         help=(
-            "The maximum folders level to traverse in separate requests. "
-            "By default traverse all levels."
+            "The maximum folder levels to traverse in separate requests. "
+            "By default, traverse all levels."
         ),
     )(func)
     func = click.option(
@@ -60,21 +60,24 @@ def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
         "-f",
         type=int,
         default=None,
-        help="The maximum number of folders to list in one request. By default list all folders.",
+        help="The maximum number of folders to list in one request. By default, list all folders.",
     )(func)
     func = click.option(
         "--repeat",
         "-r",
         type=int,
         default=1,
-        help="Repeat the operation multiple times to average elapsed time. By default repeat once.",
+        help=(
+            "Repeat the operation multiple times to calculate average elapsed time. "
+            "By default, repeat once."
+        ),
     )(func)
     func = click.option(
         "--parallelism",
         "-p",
         type=int,
         default=100,
-        help="The maximum number of concurrent requests to AWS S3. By default 100.",
+        help="The maximum number of concurrent requests to AWS S3. By default, 100.",
     )(func)
     return click.option(
         "--delimiter",
