@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Setup
 
-This project requires [uv](https://github.com/astral-sh/uv) for dependency management. Run `. ./activate.sh` to set up the development environment.
+This project requires [uv](https://github.com/astral-sh/uv) for dependency management.
+
+**IMPORTANT**: Always run `. ./activate.sh` (or `source ./activate.sh`) first to create/activate the virtual environment before running any commands or tests.
 
 ## Core Architecture
 
