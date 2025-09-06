@@ -4,7 +4,7 @@
 
 S3 bucket helper utilities.
 
-Asynchronously list objects by folders or by prefix groups with recursion limit.
+Asynchronously lists objects by folders or grouped by prefix, with an optional recursion limit.
 
 # Documentation
 
@@ -12,15 +12,15 @@ Asynchronously list objects by folders or by prefix groups with recursion limit.
 
 # Developers
 
-Do not forget to run `. ./activate.sh`.
+Run `. ./activate.sh` to create/activate the virtual environment.
 
-For development, you need [uv](https://github.com/astral-sh/uv) installed.
+Requires [uv](https://github.com/astral-sh/uv) for dependency management.
 
 Use [pre-commit](https://pre-commit.com/#install) hooks for code quality:
 
     pre-commit install
 
-## Allure test report
+## Allure Test Report
 
 * [Allure report](https://andgineer.github.io/async-s3/builds/tests/)
 
