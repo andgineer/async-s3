@@ -126,5 +126,9 @@ async def test_list_objects_with_progress_client_error():
 
     s3_list.iter = lambda *args, **kwargs: MockAsyncIterator()
 
+    from async_s3.main import ListingConfig
+
+    config = ListingConfig(s3_url="s3://test-bucket/prefix")
+
     with pytest.raises(click.Abort):
-        await list_objects_with_progress(s3_list, "prefix", None, None, "/")
+        await list_objects_with_progress(s3_list, config)

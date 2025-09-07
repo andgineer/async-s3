@@ -3,6 +3,7 @@
 import asyncio
 import time
 from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 import botocore.exceptions
@@ -16,6 +17,28 @@ click.rich_click.USE_MARKDOWN = True
 
 S3PROTO = "s3://"
 PROGRESS_REFRESH_INTERVAL = 0.5
+
+
+@dataclass
+class ListingConfig:
+    """Configuration for S3 object listing operations."""
+
+    s3_url: str
+    max_level: Optional[int] = None
+    max_folders: Optional[int] = None
+    delimiter: str = "/"
+    parallelism: int = 100
+    repeat: int = 1
+
+    @property
+    def bucket(self) -> str:
+        """Extract bucket name from S3 URL."""
+        return split_s3_url(self.s3_url)[0]
+
+    @property
+    def key(self) -> str:
+        """Extract key/prefix from S3 URL."""
+        return split_s3_url(self.s3_url)[1]
 
 
 def error(message: str) -> None:
@@ -40,6 +63,34 @@ def print_summary(objects: Iterable[dict[str, Any]]) -> None:
 @click.version_option(version=__version__, prog_name="as3")
 def as3() -> None:
     """Async S3."""
+
+
+class S3ListCommand:
+    """Base class for S3 listing commands."""
+
+    def __init__(  # noqa: PLR0913
+        self,
+        s3_url: str,
+        max_level: Optional[int],
+        max_folders: Optional[int],
+        repeat: int,
+        parallelism: int,
+        delimiter: str,
+    ):
+        self.config = ListingConfig(
+            s3_url=s3_url,
+            max_level=max_level,
+            max_folders=max_folders,
+            repeat=repeat,
+            parallelism=parallelism,
+            delimiter=delimiter,
+        )
+
+    def validate_and_execute(self) -> Iterable[dict[str, Any]]:
+        """Validate S3 URL and execute listing."""
+        if not self.config.s3_url.startswith(S3PROTO):
+            error("Invalid S3 URL. It should start with s3://")
+        return list_objects(self.config)
 
 
 def list_objects_options(func: Callable[[Any], None]) -> Callable[[Any], None]:
@@ -112,17 +163,8 @@ def ls(  # noqa: PLR0913
     Example:
     as3 ls s3://bucket/key
     """
-    if not s3_url.startswith(S3PROTO):
-        error("Invalid S3 URL. It should start with s3://")
-
-    objects = list_objects(
-        s3_url,
-        max_level=max_level,
-        max_folders=max_folders,
-        repeat=repeat,
-        parallelism=parallelism,
-        delimiter=delimiter,
-    )
+    cmd = S3ListCommand(s3_url, max_level, max_folders, repeat, parallelism, delimiter)
+    objects = cmd.validate_and_execute()
     click.echo("\n".join([obj["Key"] for obj in objects]))
     print_summary(objects)
 
@@ -143,17 +185,8 @@ def du(  # noqa: PLR0913
     Example:
     as3 du s3://bucket/key
     """
-    if not s3_url.startswith(S3PROTO):
-        error("Invalid S3 URL. It should start with s3://")
-
-    objects = list_objects(
-        s3_url,
-        max_level=max_level,
-        max_folders=max_folders,
-        repeat=repeat,
-        parallelism=parallelism,
-        delimiter=delimiter,
-    )
+    cmd = S3ListCommand(s3_url, max_level, max_folders, repeat, parallelism, delimiter)
+    objects = cmd.validate_and_execute()
     print_summary(objects)
 
 
@@ -167,99 +200,60 @@ def human_readable_size(size: float, decimal_places: int = 2) -> str:
     return f"{size:.{decimal_places}f} {_unit}"
 
 
-def list_objects(  # noqa: PLR0913
-    s3_url: str,
-    max_level: Optional[int] = None,
-    max_folders: Optional[int] = None,
-    repeat: int = 1,
-    parallelism: int = 100,
-    delimiter: str = "/",
-) -> Iterable[dict[str, Any]]:
+def list_objects(config: ListingConfig) -> Iterable[dict[str, Any]]:
     """List objects in an S3 bucket."""
-    return asyncio.run(
-        list_objects_async(
-            s3_url,
-            max_level=max_level,
-            max_folders=max_folders,
-            repeat=repeat,
-            parallelism=parallelism,
-            delimiter=delimiter,
-        ),
-    )
+    return asyncio.run(list_objects_async(config))
 
 
-async def list_objects_async(  # noqa: PLR0913
-    s3_url: str,
-    max_level: Optional[int],
-    max_folders: Optional[int],
-    repeat: int,
-    parallelism: int,
-    delimiter: str,
-) -> Iterable[dict[str, Any]]:
+async def list_objects_async(config: ListingConfig) -> Iterable[dict[str, Any]]:
     """List objects in an S3 bucket."""
-    assert repeat > 0
-    print_start_info(s3_url, max_level, max_folders, delimiter, parallelism, repeat)
+    assert config.repeat > 0
+    print_start_info(config)
 
-    bucket, key = split_s3_url(s3_url)
-    s3_list = S3BucketObjects(bucket, parallelism=parallelism)
+    s3_list = S3BucketObjects(config.bucket, parallelism=config.parallelism)
     total_time = 0.0
     result: Iterable[dict[str, Any]] = []
 
-    for attempt in range(repeat):
-        result, duration = await list_objects_with_progress(
-            s3_list,
-            key,
-            max_level,
-            max_folders,
-            delimiter,
-        )
+    for attempt in range(config.repeat):
+        result, duration = await list_objects_with_progress(s3_list, config)
         total_time += duration
         print_attempt_info(attempt, duration)
 
-    if repeat > 1:
-        print_average_time(total_time, repeat)
+    if config.repeat > 1:
+        print_average_time(total_time, config.repeat)
 
     return result
 
 
-def print_start_info(  # noqa: PLR0913
-    s3_url: str,
-    max_level: Optional[int],
-    max_folders: Optional[int],
-    delimiter: str,
-    parallelism: int,
-    repeat: int,
-) -> None:
+def print_start_info(config: ListingConfig) -> None:
     """Print the command parameters."""
     click.echo(
         f"{click.style('Listing objects in ', fg='yellow')}"
-        f"{click.style(s3_url, fg='yellow', bold=True)}",
+        f"{click.style(config.s3_url, fg='yellow', bold=True)}",
     )
     click.echo(
         f"{click.style('max_level: ', fg='yellow')}"
-        f"{click.style(str(max_level), fg='yellow', bold=True)}, "
+        f"{click.style(str(config.max_level), fg='yellow', bold=True)}, "
         f"{click.style('max_folders: ', fg='yellow')}"
-        f"{click.style(str(max_folders), fg='yellow', bold=True)}, "
+        f"{click.style(str(config.max_folders), fg='yellow', bold=True)}, "
         f"{click.style('delimiter: ', fg='yellow')}"
-        f"{click.style(delimiter, fg='yellow', bold=True)}, "
+        f"{click.style(config.delimiter, fg='yellow', bold=True)}, "
         f"{click.style('parallelism: ', fg='yellow')}"
-        f"{click.style(str(parallelism), fg='yellow', bold=True)}, "
-        f"{click.style(str(repeat), fg='yellow', bold=True)}"
+        f"{click.style(str(config.parallelism), fg='yellow', bold=True)}, "
+        f"{click.style(str(config.repeat), fg='yellow', bold=True)}"
         f"{click.style(' times.', fg='yellow')}",
     )
 
 
-def split_s3_url(s3_url: str) -> Iterable[str]:
+def split_s3_url(s3_url: str) -> tuple[str, str]:
     """Split an S3 URL into bucket and key."""
-    return s3_url[len(S3PROTO) :].split("/", 1)
+    parts = s3_url[len(S3PROTO) :].split("/", 1)
+    return (parts[0], parts[1] if len(parts) > 1 else "")
 
 
-async def list_objects_with_progress(  # pylint: disable=too-many-locals
+async def list_objects_with_progress(
     s3_list: S3BucketObjects,
-    key: str,
-    max_level: Optional[int],
-    max_folders: Optional[int],
-    delimiter: str,
+    config: ListingConfig,
 ) -> tuple[Iterable[dict[str, Any]], float]:
     """List objects in an S3 bucket with a progress bar.
 
@@ -281,10 +275,10 @@ async def list_objects_with_progress(  # pylint: disable=too-many-locals
             objects_bar = progress.add_task("[green]Objects: ", total=None)
             size_bar = progress.add_task("[green]Size:    ", total=None)
             async for objects_page in s3_list.iter(
-                key,
-                max_level=max_level,
-                max_folders=max_folders,
-                delimiter=delimiter,
+                config.key,
+                max_level=config.max_level,
+                max_folders=config.max_folders,
+                delimiter=config.delimiter,
             ):
                 result.extend(objects_page)
                 page_objects_size = sum(obj["Size"] for obj in objects_page)
