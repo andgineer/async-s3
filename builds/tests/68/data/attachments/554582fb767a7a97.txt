@@ -1,0 +1,7 @@
+ERROR    asyncio:base_events.py:1833 Task exception was never retrieved
+future: <Task finished name='Task-12' coro=<S3BucketObjects._list_objects() done, defined at /home/runner/work/async-s3/async-s3/src/async_s3/s3_bucket_objects.py:40> exception=TypeError("'async for' requires an object with __aiter__ method, got coroutine")>
+Traceback (most recent call last):
+  File "/home/runner/work/async-s3/async-s3/src/async_s3/s3_bucket_objects.py", line 60, in _list_objects
+    async for page in paginator.paginate(**params):
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'async for' requires an object with __aiter__ method, got coroutine
