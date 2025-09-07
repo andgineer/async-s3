@@ -6,9 +6,9 @@
 |------------------------------------- | -------: | -------: | ------: | --------: |
 | src/async\_s3/\_\_about\_\_.py       |        1 |        0 |    100% |           |
 | src/async\_s3/group\_by\_prefix.py   |       51 |        0 |    100% |           |
-| src/async\_s3/main.py                |      105 |        0 |    100% |           |
+| src/async\_s3/main.py                |      125 |        0 |    100% |           |
 | src/async\_s3/s3\_bucket\_objects.py |       78 |        8 |     90% |18, 23-27, 95-97, 160 |
-|                            **TOTAL** |  **235** |    **8** | **97%** |           |
+|                            **TOTAL** |  **255** |    **8** | **97%** |           |
 
 
 ## Setup coverage badge
