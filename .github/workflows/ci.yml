@@ -69,7 +69,7 @@ jobs:
 
 
     - name: Install uv environment
-      uses: andgineer/uv-venv@v1
+      uses: andgineer/uv-venv@v3.0.1
 
     - name: Install dependencies
       run: uv pip install -r requirements.dev.txt
