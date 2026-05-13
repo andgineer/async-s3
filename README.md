@@ -7,8 +7,8 @@
 | src/async\_s3/\_\_about\_\_.py       |        1 |        0 |    100% |           |
 | src/async\_s3/group\_by\_prefix.py   |       51 |        0 |    100% |           |
 | src/async\_s3/main.py                |      124 |        0 |    100% |           |
-| src/async\_s3/s3\_bucket\_objects.py |       78 |        8 |     90% |18, 23-27, 95-97, 160 |
-| **TOTAL**                            |  **254** |    **8** | **97%** |           |
+| src/async\_s3/s3\_bucket\_objects.py |       79 |        8 |     90% |19, 24-28, 96-98, 161 |
+| **TOTAL**                            |  **255** |    **8** | **97%** |           |
 
 
 ## Setup coverage badge
