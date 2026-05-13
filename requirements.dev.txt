@@ -30,10 +30,6 @@ annotated-types==0.7.0
     # via pydantic
 antlr4-python3-runtime==4.13.2
     # via moto
-ast-serialize==0.3.0
-    # via mypy
-astroid==4.0.4
-    # via pylint
 attrs==26.1.0
     # via
     #   -r requirements.txt
@@ -89,8 +85,6 @@ cryptography==48.0.0
     #   moto
 deepmerge==2.0
     # via zensical
-dill==0.4.1
-    # via pylint
 distlib==0.4.0
     # via virtualenv
 docker==7.1.0
@@ -129,8 +123,6 @@ iniconfig==2.3.0
     # via pytest
 invoke==3.0.3
     # via -r requirements.dev.in
-isort==8.0.1
-    # via pylint
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
@@ -166,8 +158,6 @@ jsonschema-specifications==2025.9.1
     #   openapi-schema-validator
 lazy-object-proxy==1.12.0
     # via openapi-spec-validator
-librt==0.11.0
-    # via mypy
 markdown==3.10.2
     # via
     #   mkdocs
@@ -187,8 +177,6 @@ markupsafe==3.0.3
     #   mkdocs-autorefs
     #   mkdocstrings
     #   werkzeug
-mccabe==0.7.0
-    # via pylint
 mdurl==0.1.2
     # via
     #   -r requirements.txt
@@ -226,10 +214,6 @@ multidict==6.7.1
     #   aiobotocore
     #   aiohttp
     #   yarl
-mypy==2.1.0
-    # via -r requirements.dev.in
-mypy-extensions==1.1.0
-    # via mypy
 natsort==8.4.0
     # via mkdocs-awesome-pages-plugin
 networkx==3.6.1
@@ -251,11 +235,9 @@ pathspec==1.1.1
     # via
     #   hatchling
     #   mkdocs
-    #   mypy
 platformdirs==4.9.6
     # via
     #   mkdocs-get-deps
-    #   pylint
     #   python-discovery
     #   virtualenv
 pluggy==1.6.0
@@ -293,8 +275,6 @@ pygments==2.20.0
     #   pytest
     #   rich
     #   zensical
-pylint==4.0.5
-    # via -r requirements.dev.in
 pymdown-extensions==10.21.2
     # via
     #   -r requirements.dev.in
@@ -302,6 +282,8 @@ pymdown-extensions==10.21.2
     #   zensical
 pyparsing==3.3.2
     # via moto
+pyrefly==1.0.0
+    # via -r requirements.dev.in
 pytest==9.0.3
     # via
     #   -r requirements.dev.in
@@ -383,8 +365,6 @@ toml==0.10.2
     # via -r requirements.dev.in
 tomli==2.4.1
     # via zensical
-tomlkit==0.15.0
-    # via pylint
 trove-classifiers==2026.5.7.17
     # via hatchling
 typing-extensions==4.15.0
@@ -393,7 +373,6 @@ typing-extensions==4.15.0
     #   aiosignal
     #   aws-sam-translator
     #   cfn-lint
-    #   mypy
     #   pydantic
     #   pydantic-core
     #   pytest-asyncio

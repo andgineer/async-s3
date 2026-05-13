@@ -10,8 +10,7 @@ pyyaml
 
 # lint
 pre-commit
-mypy
-pylint
+pyrefly
 
 
 # docs
