@@ -33,4 +33,4 @@ async for page in S3BucketObjects(bucket='my-bucket').iter("my-prefix/", max_lev
 ```
 
 ## Сгенерированная из исходников документация
-[S3BucketObjects][async_s3]
+[S3BucketObjects](reference.md#async_s3)

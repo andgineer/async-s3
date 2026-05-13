@@ -5,6 +5,7 @@ from typing import Any, Optional
 
 import aiobotocore.client
 import aiobotocore.session
+from aiobotocore.session import ClientCreatorContext
 from botocore.config import Config
 
 from async_s3.group_by_prefix import group_by_prefix
@@ -18,7 +19,7 @@ def create_session() -> aiobotocore.session.AioSession:
     return aiobotocore.session.get_session()
 
 
-def get_s3_client() -> aiobotocore.client.AioBaseClient:
+def get_s3_client() -> ClientCreatorContext:
     """Get S3 client."""
     session = create_session()
     config = Config(
