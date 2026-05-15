@@ -5,7 +5,7 @@
 name: CI
 
 env:
-  PRIMARY_PYTHON_VERSION: '3.12'
+  PRIMARY_PYTHON_VERSION: '3.13'
   PRIMARY_PLATFORM: 'ubuntu-latest'
   PYTEST_CMD: >-
     python -m pytest
@@ -30,7 +30,7 @@ jobs:
   matrix-build:
     strategy:
       matrix:
-        python-version: [3.11, 3.12]
+        python-version: [3.11, 3.12, 3.13]
         platform: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
 
@@ -47,7 +47,9 @@ jobs:
       uses: andgineer/uv-venv@v1
 
     - name: Install dependencies
-      run: uv pip install -r requirements.dev.txt
+      run: |
+        uv pip install -r pyproject.toml --group dev --python=${{ matrix.python-version }}
+        uv pip install -e .
 
     - name: Test with pytest
       run: ${{ env.PYTEST_CMD }}

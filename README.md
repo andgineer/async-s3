@@ -26,10 +26,6 @@ Use [pre-commit](https://pre-commit.com/#install) hooks for code quality:
 
 # Scripts
 
-Install [invoke](https://docs.pyinvoke.org/en/stable/) preferably with [pipx](https://pypa.github.io/pipx/):
-
-    pipx install invoke
-
 For a list of available scripts, run:
 
     invoke --list
@@ -37,7 +33,6 @@ For a list of available scripts, run:
 For more information about a script, run:
 
     invoke <script> --help
-
 
 ## Coverage Reports
 * [Codecov](https://app.codecov.io/gh/andgineer/async-s3/tree/main/src%2Fasync_s3)
