@@ -1,0 +1,9 @@
+Listing objects in s3://bucket/key
+max_level: 1, max_folders: 1, delimiter: /, parallelism: 100, 3 times.
+
+(1) Elapsed time: 0.00 seconds
+
+(2) Elapsed time: 0.00 seconds
+
+(3) Elapsed time: 0.00 seconds
+Average time: 0.00 seconds
